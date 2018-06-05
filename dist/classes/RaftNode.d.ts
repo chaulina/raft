@@ -16,9 +16,6 @@ export default class RaftNode {
     changes: Array<IChange>;
     fellows: Array<string>;
     vote: string;
-    voteAccumulation: {
-        [key: string]: boolean;
-    };
     constructor(port?: number, heartBeatTimeOut?: number, electionTimeOut?: number, url?: string);
     stringify(data: any): string;
     sendQuery(url: string, query: {

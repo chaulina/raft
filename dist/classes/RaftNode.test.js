@@ -6,12 +6,12 @@ const httpRequest = require("request");
 const port1 = 3010;
 const port2 = 3011;
 const port3 = 3012;
-const heartBeatTimeOut1 = 100;
-const heartBeatTimeOut2 = 100;
-const heartBeatTimeOut3 = 100;
-const electionTimeOut1 = 175;
-const electionTimeOut2 = 200;
-const electionTimeOut3 = 225;
+const heartBeatTimeOut1 = 50;
+const heartBeatTimeOut2 = 50;
+const heartBeatTimeOut3 = 50;
+const electionTimeOut1 = 225;
+const electionTimeOut2 = 250;
+const electionTimeOut3 = 275;
 const baseUrl = 'http://localhost';
 const url1 = baseUrl + ':' + port1;
 const url2 = baseUrl + ':' + port2;
@@ -48,7 +48,7 @@ it('add node2 to node1', (done) => {
         done();
     });
 });
-it('add node2 to node1 again', (done) => {
+it('re-add node2 to node1', (done) => {
     httpRequest(`${url1}/addFellow?nodeUrl=${url2}`, (error, response, body) => {
         let result = JSON.parse(body);
         expect(result).toBeFalsy();
@@ -65,11 +65,75 @@ it('add node3 to node1', (done) => {
 it('confirm that node1 has two fellows', (done) => {
     httpRequest(`${url1}/showFellows`, (error, response, body) => {
         let result = JSON.parse(body);
+        expect(result[0]).toBe(url2);
+        expect(result[1]).toBe(url3);
+        expect(result.length).toBe(2);
+        done();
+    });
+});
+it('add node1 to node2', (done) => {
+    httpRequest(`${url2}/addFellow?nodeUrl=${url1}`, (error, response, body) => {
+        let result = JSON.parse(body);
+        expect(result).toBeTruthy();
+        done();
+    });
+});
+it('add node3 to node2', (done) => {
+    httpRequest(`${url2}/addFellow?nodeUrl=${url3}`, (error, response, body) => {
+        let result = JSON.parse(body);
+        expect(result).toBeTruthy();
+        done();
+    });
+});
+it('add node1 to node3', (done) => {
+    httpRequest(`${url3}/addFellow?nodeUrl=${url1}`, (error, response, body) => {
+        let result = JSON.parse(body);
+        expect(result).toBeTruthy();
+        done();
+    });
+});
+it('add node2 to node3', (done) => {
+    httpRequest(`${url3}/addFellow?nodeUrl=${url2}`, (error, response, body) => {
+        let result = JSON.parse(body);
+        expect(result).toBeTruthy();
+        done();
+    });
+});
+it('remove node1 to node3', (done) => {
+    httpRequest(`${url3}/removeFellow?nodeUrl=${url1}`, (error, response, body) => {
+        let result = JSON.parse(body);
+        expect(result).toBeTruthy();
+        done();
+    });
+});
+it('confirm that node3 has only node2 as fellow', (done) => {
+    httpRequest(`${url3}/showFellows`, (error, response, body) => {
+        let result = JSON.parse(body);
+        expect(result[0]).toBe(url2);
+        expect(result.length).toBe(1);
+        done();
+    });
+});
+it('re-add node1 to node3', (done) => {
+    httpRequest(`${url3}/addFellow?nodeUrl=${url1}`, (error, response, body) => {
+        let result = JSON.parse(body);
+        expect(result).toBeTruthy();
+        done();
+    });
+});
+it('confirm that node3 has two fellows', (done) => {
+    httpRequest(`${url3}/showFellows`, (error, response, body) => {
+        let result = JSON.parse(body);
+        expect(result[0]).toBe(url2);
+        expect(result[1]).toBe(url1);
         expect(result.length).toBe(2);
         done();
     });
 });
 // CLOSE ALL NODES
+it('wait for a while', (done) => {
+    setTimeout(() => done(), 1000);
+});
 it('close node1', (done) => {
     server1.close(() => {
         expect(server1.listening).toBeFalsy();

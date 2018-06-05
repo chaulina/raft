@@ -11,8 +11,7 @@ export default class RaftNode {
   data: {[key: string]: string} = {}
   changes: Array<IChange> = []
   fellows: Array<string> = []
-  vote: string
-  voteAccumulation: {[key:string]: boolean}
+  vote: string = ''
 
   constructor(public port: number = 80, public heartBeatTimeOut: number = 100, public electionTimeOut: number = 150, url: string = 'http://localhost') {
     this.currentUrl = `${url}:${port}`
@@ -27,13 +26,21 @@ export default class RaftNode {
       let queryString: string = Object.keys(query).map((key) => key + '=' + query[key]).join('&')
       url = queryString === '' ? url : url + '?' + queryString
       httpRequest(url, (error, body, response) => {
-        resolve(JSON.parse(response))
+        if (error) {
+          return reject(error)
+        }
+        try {
+          return resolve(JSON.parse(response))
+        } catch (error) {
+          return reject(error)
+        }
       })
     }) 
   }
 
   addFellow (nodeUrl): boolean {
     if (this.fellows.indexOf(nodeUrl) === -1) {
+      this.currentState = 0
       this.fellows.push(nodeUrl)
       return true
     }
@@ -45,18 +52,45 @@ export default class RaftNode {
     if (index === -1) {
       return false
     }
+    this.currentState = 0
     this.fellows.splice(index, 1)
     return true
   }
 
   sendElectRequest (): void {
-    // TODO: set current vote to itself, ask other to vote
+    // vote for itself
+    this.vote = this.currentUrl
+    this.term ++
+    this.lastHeartBeat = new Date().getTime()
+    // ask others to vote too
+    const query = {candidate: this.currentUrl, term: this.term.toString()}
+    let promises: Array<Promise<any>> = []
+    for (let fellow of this.fellows) {
+      promises.push(this.sendQuery(`${fellow}/electRequest`, query))
+    }
+    Promise.all(promises).then((fellowVotes) => {
+      const voteCount = fellowVotes.filter((val)=>val).length + 1
+      if (voteCount > (this.fellows.length / 2)) {
+        // new leader
+        this.currentState = 2
+      } else {
+        this.vote = ''
+        this.currentState = 0
+        this.term--
+      }
+      this.loop()
+    }).catch((error) => {
+      this.vote = ''
+      this.currentState = 0
+      this.term--
+      this.loop()
+    })
   }
 
   voteCandidate (candidate: string, term: number): boolean {
     if (this.currentState === 0 && this.vote === '' && this.term < term) {
       this.vote = candidate
-      this.term = term
+      this.lastHeartBeat = new Date().getTime()
       return true
     }
     return false
@@ -64,6 +98,7 @@ export default class RaftNode {
 
   sendHeartBeat (): void {
     // TODO: propagate changes
+    setTimeout(()=>this.loop(), this.heartBeatTimeOut)
   }
 
   setData (key: string, value: string): Promise<boolean> {
@@ -96,7 +131,13 @@ export default class RaftNode {
       case 1: stateString = 'Candidate'; break
       case 2: stateString = 'Leader'; break
     }
-    console.log(`${this.currentUrl} state is ${stateString}`)
+    console.log({
+      currentUrl: this.currentUrl,
+      state: stateString,
+      fellows: this.fellows,
+      term: this.term,
+      vote: this.vote
+    })
   }
 
   registerGetDataController (app: express.Application): void {
@@ -146,13 +187,16 @@ export default class RaftNode {
   registerElectRequestController (app: express.Application): void {
     app.use('/electRequest', (request: express.Request, response: express.Response) => {
       let candidate: string = request.query['candidate']
-      // TODO: send to candidate whether approve or reject
+      let term: number = parseInt(request.query['term'])
+      let vote = this.voteCandidate(candidate, term)
       response.send('')
     })
   }
 
   registerHeartBeatController (app: express.Application): void {
     app.use('/heartBeat', (request: express.Request, response: express.Response) => {
+      let nodeUrl: string = request.query['from']
+      let term: number = parseInt(request.query['term'])
       response.send('')
     })
   }
@@ -173,7 +217,9 @@ export default class RaftNode {
     const server: http.Server = app.listen(this.port, () => {
       console.log(`Initiating RaftNode at ${this.currentUrl}`)
       callback()
-      this.loop()
+      setTimeout(()=>{
+        this.loop()
+      }, this.heartBeatTimeOut)
     })
     return server
   }
@@ -184,9 +230,10 @@ export default class RaftNode {
       // make this a candidate and run again
       this.currentState = 1
       this.loop()
+    } else if (this.currentState === 0) {
+      setTimeout(()=>this.loop(), this.electionTimeOut)
     } else if (this.currentState === 1) {
       // send elect request and wait
-      this.term += 1
       this.sendElectRequest()
     } else if (this.currentState === 2) {
       this.sendHeartBeat()

@@ -13,6 +13,7 @@ class RaftNode {
         this.data = {};
         this.changes = [];
         this.fellows = [];
+        this.vote = '';
         this.currentUrl = `${url}:${port}`;
     }
     stringify(data) {
@@ -23,12 +24,21 @@ class RaftNode {
             let queryString = Object.keys(query).map((key) => key + '=' + query[key]).join('&');
             url = queryString === '' ? url : url + '?' + queryString;
             httpRequest(url, (error, body, response) => {
-                resolve(JSON.parse(response));
+                if (error) {
+                    return reject(error);
+                }
+                try {
+                    return resolve(JSON.parse(response));
+                }
+                catch (error) {
+                    return reject(error);
+                }
             });
         });
     }
     addFellow(nodeUrl) {
         if (this.fellows.indexOf(nodeUrl) === -1) {
+            this.currentState = 0;
             this.fellows.push(nodeUrl);
             return true;
         }
@@ -39,22 +49,51 @@ class RaftNode {
         if (index === -1) {
             return false;
         }
+        this.currentState = 0;
         this.fellows.splice(index, 1);
         return true;
     }
     sendElectRequest() {
-        // TODO: set current vote to itself, ask other to vote
+        // vote for itself
+        this.vote = this.currentUrl;
+        this.term++;
+        this.lastHeartBeat = new Date().getTime();
+        // ask others to vote too
+        const query = { candidate: this.currentUrl, term: this.term.toString() };
+        let promises = [];
+        for (let fellow of this.fellows) {
+            promises.push(this.sendQuery(`${fellow}/electRequest`, query));
+        }
+        Promise.all(promises).then((fellowVotes) => {
+            const voteCount = fellowVotes.filter((val) => val).length + 1;
+            if (voteCount > (this.fellows.length / 2)) {
+                // new leader
+                this.currentState = 2;
+            }
+            else {
+                this.vote = '';
+                this.currentState = 0;
+                this.term--;
+            }
+            this.loop();
+        }).catch((error) => {
+            this.vote = '';
+            this.currentState = 0;
+            this.term--;
+            this.loop();
+        });
     }
     voteCandidate(candidate, term) {
         if (this.currentState === 0 && this.vote === '' && this.term < term) {
             this.vote = candidate;
-            this.term = term;
+            this.lastHeartBeat = new Date().getTime();
             return true;
         }
         return false;
     }
     sendHeartBeat() {
         // TODO: propagate changes
+        setTimeout(() => this.loop(), this.heartBeatTimeOut);
     }
     setData(key, value) {
         // TODO: if this is leader, save to this.change and propagate
@@ -89,7 +128,13 @@ class RaftNode {
                 stateString = 'Leader';
                 break;
         }
-        console.log(`${this.currentUrl} state is ${stateString}`);
+        console.log({
+            currentUrl: this.currentUrl,
+            state: stateString,
+            fellows: this.fellows,
+            term: this.term,
+            vote: this.vote
+        });
     }
     registerGetDataController(app) {
         app.use('/get', (request, response) => {
@@ -133,7 +178,8 @@ class RaftNode {
     registerElectRequestController(app) {
         app.use('/electRequest', (request, response) => {
             let candidate = request.query['candidate'];
-            // TODO: send to candidate whether approve or reject
+            let term = parseInt(request.query['term']);
+            let vote = this.voteCandidate(candidate, term);
             response.send('');
         });
     }
@@ -157,7 +203,9 @@ class RaftNode {
         const server = app.listen(this.port, () => {
             console.log(`Initiating RaftNode at ${this.currentUrl}`);
             callback();
-            this.loop();
+            setTimeout(() => {
+                this.loop();
+            }, this.heartBeatTimeOut);
         });
         return server;
     }
@@ -168,9 +216,11 @@ class RaftNode {
             this.currentState = 1;
             this.loop();
         }
+        else if (this.currentState === 0) {
+            setTimeout(() => this.loop(), this.electionTimeOut);
+        }
         else if (this.currentState === 1) {
             // send elect request and wait
-            this.term += 1;
             this.sendElectRequest();
         }
         else if (this.currentState === 2) {

@@ -1,10 +1,11 @@
 export default interface IChange {
   key: string
   value: string
-  commit: IChangeCommit
+  states: IChangeCommit
 }
 
 export interface IChangeCommit {
   nodeUrl: string
+  ok: boolean
   commit: boolean
 }
