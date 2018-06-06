@@ -6,6 +6,7 @@ import httpRequest = require('request')
 export default class RaftNode {
   currentState: number = 0 // 0: follower, 1: candidate, 2: leader
   currentUrl: string
+  currentLeader: string = ''
   term: number = 0
   lastHeartBeat: number = 0
   data: {[key: string]: string} = {}
@@ -73,6 +74,7 @@ export default class RaftNode {
       if (voteCount > (this.fellows.length / 2)) {
         // new leader
         this.currentState = 2
+        this.currentLeader = this.currentUrl
       } else {
         this.vote = ''
         this.currentState = 0
@@ -97,6 +99,13 @@ export default class RaftNode {
   }
 
   sendHeartBeat (): void {
+    this.lastHeartBeat = new Date().getTime()
+    const query = {from: this.currentUrl, term: this.term.toString()}
+    let promises: Array<Promise<any>> = []
+    for (let fellow of this.fellows) {
+      promises.push(this.sendQuery(`${fellow}/heartBeat`, query))
+    }
+    Promise.all(promises)
     // TODO: propagate changes
     setTimeout(()=>this.loop(), this.heartBeatTimeOut)
   }
@@ -120,8 +129,12 @@ export default class RaftNode {
     return result
   }
 
+  isNotAcceptHeartBeat (): boolean {
+    return new Date().getTime() - this.electionTimeOut > this.lastHeartBeat
+  }
+
   isShouldBeCandidate (): boolean {
-    return this.currentState === 0 && new Date().getTime() - this.electionTimeOut > this.lastHeartBeat
+    return this.currentState === 0 && this.isNotAcceptHeartBeat()
   }
 
   logState (): void {
@@ -134,6 +147,7 @@ export default class RaftNode {
     console.log({
       currentUrl: this.currentUrl,
       state: stateString,
+      currentLeader: this.currentLeader,
       fellows: this.fellows,
       term: this.term,
       vote: this.vote
@@ -189,7 +203,7 @@ export default class RaftNode {
       let candidate: string = request.query['candidate']
       let term: number = parseInt(request.query['term'])
       let vote = this.voteCandidate(candidate, term)
-      response.send('')
+      response.send(this.stringify(vote))
     })
   }
 
@@ -197,7 +211,11 @@ export default class RaftNode {
     app.use('/heartBeat', (request: express.Request, response: express.Response) => {
       let nodeUrl: string = request.query['from']
       let term: number = parseInt(request.query['term'])
-      response.send('')
+      if (this.vote === '' || nodeUrl === this.vote || nodeUrl === this.currentLeader) {
+        this.currentLeader = nodeUrl
+        this.lastHeartBeat = new Date().getTime()
+      }
+      response.send(this.stringify(true))
     })
   }
 
@@ -226,17 +244,29 @@ export default class RaftNode {
 
   loop (): void {
     this.logState()
-    if (this.isShouldBeCandidate()) {
-      // make this a candidate and run again
-      this.currentState = 1
-      this.loop()
-    } else if (this.currentState === 0) {
-      setTimeout(()=>this.loop(), this.electionTimeOut)
+    if (this.currentState === 0) {
+      if (this.isNotAcceptHeartBeat()) {
+        // make this a candidate and run again
+        this.currentState = 1
+        this.currentLeader = ''
+        this.vote = ''
+        this.loop()
+      } else {
+        // run again after electionTimeOut
+        setTimeout(()=>this.loop(), this.electionTimeOut)
+      }
     } else if (this.currentState === 1) {
       // send elect request and wait
       this.sendElectRequest()
     } else if (this.currentState === 2) {
-      this.sendHeartBeat()
+      if (this.isNotAcceptHeartBeat()) {
+        this.currentState = 0
+        this.currentLeader = ''
+        this.vote = ''
+        this.loop()
+      } else {
+        this.sendHeartBeat()
+      }
     }
   }
 

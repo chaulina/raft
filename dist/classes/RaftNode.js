@@ -8,6 +8,7 @@ class RaftNode {
         this.heartBeatTimeOut = heartBeatTimeOut;
         this.electionTimeOut = electionTimeOut;
         this.currentState = 0; // 0: follower, 1: candidate, 2: leader
+        this.currentLeader = '';
         this.term = 0;
         this.lastHeartBeat = 0;
         this.data = {};
@@ -69,6 +70,7 @@ class RaftNode {
             if (voteCount > (this.fellows.length / 2)) {
                 // new leader
                 this.currentState = 2;
+                this.currentLeader = this.currentUrl;
             }
             else {
                 this.vote = '';
@@ -92,6 +94,13 @@ class RaftNode {
         return false;
     }
     sendHeartBeat() {
+        this.lastHeartBeat = new Date().getTime();
+        const query = { from: this.currentUrl, term: this.term.toString() };
+        let promises = [];
+        for (let fellow of this.fellows) {
+            promises.push(this.sendQuery(`${fellow}/heartBeat`, query));
+        }
+        Promise.all(promises);
         // TODO: propagate changes
         setTimeout(() => this.loop(), this.heartBeatTimeOut);
     }
@@ -112,8 +121,11 @@ class RaftNode {
         }
         return result;
     }
+    isNotAcceptHeartBeat() {
+        return new Date().getTime() - this.electionTimeOut > this.lastHeartBeat;
+    }
     isShouldBeCandidate() {
-        return this.currentState === 0 && new Date().getTime() - this.electionTimeOut > this.lastHeartBeat;
+        return this.currentState === 0 && this.isNotAcceptHeartBeat();
     }
     logState() {
         let stateString;
@@ -131,6 +143,7 @@ class RaftNode {
         console.log({
             currentUrl: this.currentUrl,
             state: stateString,
+            currentLeader: this.currentLeader,
             fellows: this.fellows,
             term: this.term,
             vote: this.vote
@@ -180,12 +193,18 @@ class RaftNode {
             let candidate = request.query['candidate'];
             let term = parseInt(request.query['term']);
             let vote = this.voteCandidate(candidate, term);
-            response.send('');
+            response.send(this.stringify(vote));
         });
     }
     registerHeartBeatController(app) {
         app.use('/heartBeat', (request, response) => {
-            response.send('');
+            let nodeUrl = request.query['from'];
+            let term = parseInt(request.query['term']);
+            if (this.vote === '' || nodeUrl === this.vote || nodeUrl === this.currentLeader) {
+                this.currentLeader = nodeUrl;
+                this.lastHeartBeat = new Date().getTime();
+            }
+            response.send(this.stringify(true));
         });
     }
     registerControllers(app) {
@@ -211,20 +230,33 @@ class RaftNode {
     }
     loop() {
         this.logState();
-        if (this.isShouldBeCandidate()) {
-            // make this a candidate and run again
-            this.currentState = 1;
-            this.loop();
-        }
-        else if (this.currentState === 0) {
-            setTimeout(() => this.loop(), this.electionTimeOut);
+        if (this.currentState === 0) {
+            if (this.isNotAcceptHeartBeat()) {
+                // make this a candidate and run again
+                this.currentState = 1;
+                this.currentLeader = '';
+                this.vote = '';
+                this.loop();
+            }
+            else {
+                // run again after electionTimeOut
+                setTimeout(() => this.loop(), this.electionTimeOut);
+            }
         }
         else if (this.currentState === 1) {
             // send elect request and wait
             this.sendElectRequest();
         }
         else if (this.currentState === 2) {
-            this.sendHeartBeat();
+            if (this.isNotAcceptHeartBeat()) {
+                this.currentState = 0;
+                this.currentLeader = '';
+                this.vote = '';
+                this.loop();
+            }
+            else {
+                this.sendHeartBeat();
+            }
         }
     }
 }

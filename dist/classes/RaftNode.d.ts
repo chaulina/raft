@@ -8,6 +8,7 @@ export default class RaftNode {
     electionTimeOut: number;
     currentState: number;
     currentUrl: string;
+    currentLeader: string;
     term: number;
     lastHeartBeat: number;
     data: {
@@ -30,6 +31,7 @@ export default class RaftNode {
     getData(key?: string): {
         [key: string]: string;
     };
+    isNotAcceptHeartBeat(): boolean;
     isShouldBeCandidate(): boolean;
     logState(): void;
     registerGetDataController(app: express.Application): void;
