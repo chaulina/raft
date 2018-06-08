@@ -106,16 +106,18 @@ export default class RaftNode {
       promises.push(this.sendQuery(`${fellow}/heartBeat`, query))
     }
     Promise.all(promises)
-    // TODO: propagate changes
     setTimeout(()=>this.loop(), this.heartBeatTimeOut)
   }
 
   setData (key: string, value: string): Promise<boolean> {
-    // TODO: if this is leader, save to this.change and propagate
-    // TODO: if this is follower, send to leader
-    return new Promise((resolve, reject) => {
-      resolve(true)
-    })
+    if (this.currentState === 2) {
+      return new Promise((resolve, reject) => {
+        // TODO save this.change and propagate and send commit
+        resolve(true)
+      })
+    } else {
+      return this.sendQuery(`${this.currentLeader}/set`, {key, value})
+    }
   }
 
   getData (key?: string): {[key: string]: string} {
@@ -166,9 +168,7 @@ export default class RaftNode {
       let key: string = request.query['key']
       let value: string = request.query['value']
       this.setData(key, value).then((success) => {
-        // TODO: is this leader? if it is save changes and propagate
-        // is it client? if it is, send to leader
-        response.send(this.stringify(success))
+        response.send(this.stringify(response))
       }).catch((error) => {
         console.error(error)
         response.send(this.stringify(false))
@@ -214,6 +214,7 @@ export default class RaftNode {
       if (this.vote === '' || nodeUrl === this.vote || nodeUrl === this.currentLeader) {
         this.currentLeader = nodeUrl
         this.lastHeartBeat = new Date().getTime()
+        this.term = term
       }
       response.send(this.stringify(true))
     })

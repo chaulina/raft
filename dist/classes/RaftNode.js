@@ -101,15 +101,18 @@ class RaftNode {
             promises.push(this.sendQuery(`${fellow}/heartBeat`, query));
         }
         Promise.all(promises);
-        // TODO: propagate changes
         setTimeout(() => this.loop(), this.heartBeatTimeOut);
     }
     setData(key, value) {
-        // TODO: if this is leader, save to this.change and propagate
-        // TODO: if this is follower, send to leader
-        return new Promise((resolve, reject) => {
-            resolve(true);
-        });
+        if (this.currentState === 2) {
+            return new Promise((resolve, reject) => {
+                // TODO save this.change and propagate and send commit
+                resolve(true);
+            });
+        }
+        else {
+            return this.sendQuery(`${this.currentLeader}/set`, { key, value });
+        }
     }
     getData(key) {
         if (typeof key === 'undefined') {
@@ -160,9 +163,7 @@ class RaftNode {
             let key = request.query['key'];
             let value = request.query['value'];
             this.setData(key, value).then((success) => {
-                // TODO: is this leader? if it is save changes and propagate
-                // is it client? if it is, send to leader
-                response.send(this.stringify(success));
+                response.send(this.stringify(response));
             }).catch((error) => {
                 console.error(error);
                 response.send(this.stringify(false));
@@ -203,6 +204,7 @@ class RaftNode {
             if (this.vote === '' || nodeUrl === this.vote || nodeUrl === this.currentLeader) {
                 this.currentLeader = nodeUrl;
                 this.lastHeartBeat = new Date().getTime();
+                this.term = term;
             }
             response.send(this.stringify(true));
         });
