@@ -18,20 +18,50 @@ export default class RaftNode {
     this.currentUrl = `${url}:${port}`
   }
 
-  stringify (data) {
-    return JSON.stringify(data, null, 2)
+  stringify (data: any, pretty: boolean = true): string {
+    if (pretty) {
+      return JSON.stringify(data, null, 2)
+    }
+    return JSON.stringify(data)
   }
 
-  sendQuery (url: string, query: {[key: string]: string}): Promise<any> {
+  applyChanges (key, value): void {
+    let changeApplied = false
+    this.changes = this.changes.map((change) => {
+      if (change.key == key) {
+        change.value = value
+        change.state = 0
+        changeApplied = true
+      }
+      return change
+    })
+    if (!changeApplied) {
+      this.changes.push({key, value, state: 0})
+    }
+  }
+
+  rollbackChanges (): void {
+    this.changes = this.changes.filter((change) => {
+      return change.state === 1
+    })
+  }
+
+  commitChanges (): void {
+    this.changes = this.changes.map((change) => {
+      change.state = 1
+      this.data[change.key] = change.value
+      return change
+    })
+  }
+
+  sendQuery (url: string, query: {[key: string]: any}): Promise<any> {
     return new Promise((resolve, reject) => {
-      let queryString: string = Object.keys(query).map((key) => key + '=' + query[key]).join('&')
-      url = queryString === '' ? url : url + '?' + queryString
-      httpRequest(url, (error, body, response) => {
+      httpRequest({url, qs: query}, (error, response, body) => {
         if (error) {
           return reject(error)
         }
         try {
-          return resolve(JSON.parse(response))
+          return resolve(JSON.parse(body))
         } catch (error) {
           return reject(error)
         }
@@ -64,7 +94,7 @@ export default class RaftNode {
     this.term ++
     this.lastHeartBeat = new Date().getTime()
     // ask others to vote too
-    const query = {candidate: this.currentUrl, term: this.term.toString()}
+    const query = {candidate: this.currentUrl, term: this.term}
     let promises: Array<Promise<any>> = []
     for (let fellow of this.fellows) {
       promises.push(this.sendQuery(`${fellow}/electRequest`, query))
@@ -100,19 +130,23 @@ export default class RaftNode {
 
   sendHeartBeat (): void {
     this.lastHeartBeat = new Date().getTime()
-    const query = {from: this.currentUrl, term: this.term.toString()}
+    const query = {from: this.currentUrl, term: this.term, changes: this.changes}
     let promises: Array<Promise<any>> = []
     for (let fellow of this.fellows) {
       promises.push(this.sendQuery(`${fellow}/heartBeat`, query))
     }
-    Promise.all(promises)
+    Promise.all(promises).then((fellowResponses) => {
+      if (fellowResponses.length > this.fellows.length / 2) {
+        this.commitChanges()
+      }
+    })
     setTimeout(()=>this.loop(), this.heartBeatTimeOut)
   }
 
   setData (key: string, value: string): Promise<boolean> {
     if (this.currentState === 2) {
       return new Promise((resolve, reject) => {
-        // TODO save this.change and propagate and send commit
+        this.applyChanges(key, value)
         resolve(true)
       })
     } else {
@@ -152,7 +186,9 @@ export default class RaftNode {
       currentLeader: this.currentLeader,
       fellows: this.fellows,
       term: this.term,
-      vote: this.vote
+      vote: this.vote,
+      data: this.data,
+      changes: this.changes
     })
   }
 
@@ -168,7 +204,7 @@ export default class RaftNode {
       let key: string = request.query['key']
       let value: string = request.query['value']
       this.setData(key, value).then((success) => {
-        response.send(this.stringify(response))
+        response.send(this.stringify(success))
       }).catch((error) => {
         console.error(error)
         response.send(this.stringify(false))
@@ -211,10 +247,23 @@ export default class RaftNode {
     app.use('/heartBeat', (request: express.Request, response: express.Response) => {
       let nodeUrl: string = request.query['from']
       let term: number = parseInt(request.query['term'])
-      if (this.vote === '' || nodeUrl === this.vote || nodeUrl === this.currentLeader) {
+      if (term > this.term) {
+        // step back, follow a new leader
+        this.currentState = 0
+        this.currentLeader = nodeUrl
+        this.vote = nodeUrl
+        this.rollbackChanges()
+      }
+      if (this.vote === '' || nodeUrl === this.vote || nodeUrl === this.currentLeader || term > this.term) {
         this.currentLeader = nodeUrl
         this.lastHeartBeat = new Date().getTime()
         this.term = term
+        this.currentState = 0
+        this.vote = nodeUrl
+      }
+      if (nodeUrl === this.currentLeader) {
+        this.changes = JSON.parse(request.query['changes'])
+        this.commitChanges()
       }
       response.send(this.stringify(true))
     })
@@ -244,7 +293,6 @@ export default class RaftNode {
   }
 
   loop (): void {
-    this.logState()
     if (this.currentState === 0) {
       if (this.isNotAcceptHeartBeat()) {
         // make this a candidate and run again

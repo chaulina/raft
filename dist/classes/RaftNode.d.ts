@@ -18,9 +18,12 @@ export default class RaftNode {
     fellows: Array<string>;
     vote: string;
     constructor(port?: number, heartBeatTimeOut?: number, electionTimeOut?: number, url?: string);
-    stringify(data: any): string;
+    stringify(data: any, pretty?: boolean): string;
+    applyChanges(key: any, value: any): void;
+    rollbackChanges(): void;
+    commitChanges(): void;
     sendQuery(url: string, query: {
-        [key: string]: string;
+        [key: string]: any;
     }): Promise<any>;
     addFellow(nodeUrl: any): boolean;
     removeFellow(nodeUrl: any): boolean;

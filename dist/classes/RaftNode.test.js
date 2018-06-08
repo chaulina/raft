@@ -130,10 +130,53 @@ it('confirm that node3 has two fellows', (done) => {
         done();
     });
 });
-// CLOSE ALL NODES
+// SET & RETRIEVE
+/*
 it('wait for a while', (done) => {
-    setTimeout(() => done(), 1000);
-});
+  setTimeout(()=>{
+    node1.logState()
+    node2.logState()
+    node3.logState()
+    done()
+  }, 500)
+})
+
+it('send setData to node 1', (done) => {
+  httpRequest(`${url1}/set?key=foo&value=bar`, (error, response, body) => {
+    console.log(body)
+    let result: boolean = JSON.parse(body)
+    expect(result).toBeTruthy()
+    done()
+  })
+})
+
+it('wait for a while', (done) => {
+  setTimeout(()=>{
+    node1.logState()
+    node2.logState()
+    node3.logState()
+    done()
+  }, 500)
+})
+
+it('retrieve data from node2', (done) => {
+  httpRequest(`${url2}/get?key=foo`, (error, response, body) => {
+    let result: boolean = JSON.parse(body)
+    expect(result['foo']).toBe('bar')
+    done()
+  })
+})
+
+it('retrieve data from node3', (done) => {
+  httpRequest(`${url3}/get?key=foo`, (error, response, body) => {
+    console.log(body)
+    let result: boolean = JSON.parse(body)
+    expect(result['foo']).toBe('bar')
+    done()
+  })
+})
+*/
+// CLOSE ALL NODES
 it('close node1', (done) => {
     server1.close(() => {
         expect(server1.listening).toBeFalsy();
