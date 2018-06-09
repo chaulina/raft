@@ -101,7 +101,7 @@ it("add node2 to node3", (done) => {
         done();
     });
 });
-it("remove node1 to node3", (done) => {
+it("remove node1 from node3", (done) => {
     httpRequest(`${url3}/removeFellow?nodeUrl=${url1}`, (error, response, body) => {
         const result = JSON.parse(body);
         expect(result).toBeTruthy();
