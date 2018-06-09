@@ -11,11 +11,11 @@ export default class RaftNode {
   public lastHeartBeat: number = 0;
   public data: {[key: string]: string} = {};
   public changes: IChange[] = [];
-  public fellows: string[] = [];
   public vote: string = "";
 
   constructor(public port: number = 80, public heartBeatTimeOut: number = 100,
-              public electionTimeOut: number = 150, url: string = "http://localhost") {
+              public electionTimeOut: number = 150, url: string = "http://localhost",
+              public fellows: string[] = []) {
     this.currentUrl = `${url}:${port}`;
   }
 
