@@ -1,221 +1,219 @@
-import RaftNode from './RaftNode'
-import http = require('http')
-import httpRequest = require('request')
+import http = require("http");
+import httpRequest = require("request");
+import RaftNode from "./RaftNode";
 
 // configurations
-const port1 = 3010
-const port2 = 3011
-const port3 = 3012
-const heartBeatTimeOut1 = 50
-const heartBeatTimeOut2 = 50
-const heartBeatTimeOut3 = 50
-const electionTimeOut1 = 225
-const electionTimeOut2 = 250
-const electionTimeOut3 = 275
-const baseUrl = 'http://localhost'
-const url1 = baseUrl + ':' + port1
-const url2 = baseUrl + ':' + port2
-const url3 = baseUrl + ':' + port3
+const port1 = 3010;
+const port2 = 3011;
+const port3 = 3012;
+const heartBeatTimeOut1 = 50;
+const heartBeatTimeOut2 = 50;
+const heartBeatTimeOut3 = 50;
+const electionTimeOut1 = 225;
+const electionTimeOut2 = 250;
+const electionTimeOut3 = 275;
+const baseUrl = "http://localhost";
+const url1 = baseUrl + ":" + port1;
+const url2 = baseUrl + ":" + port2;
+const url3 = baseUrl + ":" + port3;
 
 // create nodes
-let node1 = new RaftNode(port1, heartBeatTimeOut1, electionTimeOut1, baseUrl)
-let node2 = new RaftNode(port2, heartBeatTimeOut2, electionTimeOut2, baseUrl)
-let node3 = new RaftNode(port3, heartBeatTimeOut3, electionTimeOut3, baseUrl)
-let server1: http.Server, server2: http.Server, server3: http.Server
+const node1 = new RaftNode(port1, heartBeatTimeOut1, electionTimeOut1, baseUrl);
+const node2 = new RaftNode(port2, heartBeatTimeOut2, electionTimeOut2, baseUrl);
+const node3 = new RaftNode(port3, heartBeatTimeOut3, electionTimeOut3, baseUrl);
+let server1: http.Server;
+let server2: http.Server;
+let server3: http.Server;
 
 // RUN ALL NODES
 
-it('run node1', (done) => {
-  server1 = node1.run(()=>{
-    expect(server1.listening).toBeTruthy()
-    done()
-  })
-})
+it("run node1", (done) => {
+  server1 = node1.run(() => {
+    expect(server1.listening).toBeTruthy();
+    done();
+  });
+});
 
-it('run node2', (done) => {
+it("run node2", (done) => {
   server2 = node2.run(() => {
-    expect(server2.listening).toBeTruthy()
-    done()
-  })
-})
+    expect(server2.listening).toBeTruthy();
+    done();
+  });
+});
 
-it('run node3', (done) => {
+it("run node3", (done) => {
   server3 = node3.run(() => {
-    expect(server3.listening).toBeTruthy()
-    done()
-  })
-})
+    expect(server3.listening).toBeTruthy();
+    done();
+  });
+});
 
 // ADD NODES 1
 
-it('add node2 to node1', (done) => {
+it("add node2 to node1", (done) => {
   httpRequest(`${url1}/addFellow?nodeUrl=${url2}`, (error, response, body) => {
-    let result: boolean = JSON.parse(body)
-    expect(result).toBeTruthy()
-    done()
-  })
-})
+    const result: boolean = JSON.parse(body);
+    expect(result).toBeTruthy();
+    done();
+  });
+});
 
-it('re-add node2 to node1', (done) => {
+it("re-add node2 to node1", (done) => {
   httpRequest(`${url1}/addFellow?nodeUrl=${url2}`, (error, response, body) => {
-    let result: boolean = JSON.parse(body)
-    expect(result).toBeFalsy()
-    done()
-  })
-})
+    const result: boolean = JSON.parse(body);
+    expect(result).toBeFalsy();
+    done();
+  });
+});
 
-it('add node3 to node1', (done) => {
+it("add node3 to node1", (done) => {
   httpRequest(`${url1}/addFellow?nodeUrl=${url3}`, (error, response, body) => {
-    let result: boolean = JSON.parse(body)
-    expect(result).toBeTruthy()
-    done()
-  })
-})
+    const result: boolean = JSON.parse(body);
+    expect(result).toBeTruthy();
+    done();
+  });
+});
 
-it('confirm that node1 has two fellows', (done) => {
+it("confirm that node1 has two fellows", (done) => {
   httpRequest(`${url1}/showFellows`, (error, response, body) => {
-    let result: Array<any> = JSON.parse(body)
-    expect(result[0]).toBe(url2)
-    expect(result[1]).toBe(url3)
-    expect(result.length).toBe(2)
-    done()
-  })
-})
+    const result: any[] = JSON.parse(body);
+    expect(result[0]).toBe(url2);
+    expect(result[1]).toBe(url3);
+    expect(result.length).toBe(2);
+    done();
+  });
+});
 
-it('add node1 to node2', (done) => {
+it("add node1 to node2", (done) => {
   httpRequest(`${url2}/addFellow?nodeUrl=${url1}`, (error, response, body) => {
-    let result: boolean = JSON.parse(body)
-    expect(result).toBeTruthy()
-    done()
-  })
-})
+    const result: boolean = JSON.parse(body);
+    expect(result).toBeTruthy();
+    done();
+  });
+});
 
-it('add node3 to node2', (done) => {
+it("add node3 to node2", (done) => {
   httpRequest(`${url2}/addFellow?nodeUrl=${url3}`, (error, response, body) => {
-    let result: boolean = JSON.parse(body)
-    expect(result).toBeTruthy()
-    done()
-  })
-})
+    const result: boolean = JSON.parse(body);
+    expect(result).toBeTruthy();
+    done();
+  });
+});
 
-it('add node1 to node3', (done) => {
+it("add node1 to node3", (done) => {
   httpRequest(`${url3}/addFellow?nodeUrl=${url1}`, (error, response, body) => {
-    let result: boolean = JSON.parse(body)
-    expect(result).toBeTruthy()
-    done()
-  })
-})
+    const result: boolean = JSON.parse(body);
+    expect(result).toBeTruthy();
+    done();
+  });
+});
 
-it('add node2 to node3', (done) => {
+it("add node2 to node3", (done) => {
   httpRequest(`${url3}/addFellow?nodeUrl=${url2}`, (error, response, body) => {
-    let result: boolean = JSON.parse(body)
-    expect(result).toBeTruthy()
-    done()
-  })
-})
+    const result: boolean = JSON.parse(body);
+    expect(result).toBeTruthy();
+    done();
+  });
+});
 
-it('remove node1 to node3', (done) => {
+it("remove node1 to node3", (done) => {
   httpRequest(`${url3}/removeFellow?nodeUrl=${url1}`, (error, response, body) => {
-    let result: boolean = JSON.parse(body)
-    expect(result).toBeTruthy()
-    done()
-  })
-})
+    const result: boolean = JSON.parse(body);
+    expect(result).toBeTruthy();
+    done();
+  });
+});
 
-it('confirm that node3 has only node2 as fellow', (done) => {
+it("confirm that node3 has only node2 as fellow", (done) => {
   httpRequest(`${url3}/showFellows`, (error, response, body) => {
-    let result: Array<any> = JSON.parse(body)
-    expect(result[0]).toBe(url2)
-    expect(result.length).toBe(1)
-    done()
-  })
-})
+    const result: any[] = JSON.parse(body);
+    expect(result[0]).toBe(url2);
+    expect(result.length).toBe(1);
+    done();
+  });
+});
 
-it('re-add node1 to node3', (done) => {
+it("re-add node1 to node3", (done) => {
   httpRequest(`${url3}/addFellow?nodeUrl=${url1}`, (error, response, body) => {
-    let result: boolean = JSON.parse(body)
-    expect(result).toBeTruthy()
-    done()
-  })
-})
+    const result: boolean = JSON.parse(body);
+    expect(result).toBeTruthy();
+    done();
+  });
+});
 
-it('confirm that node3 has two fellows', (done) => {
+it("confirm that node3 has two fellows", (done) => {
   httpRequest(`${url3}/showFellows`, (error, response, body) => {
-    let result: Array<any> = JSON.parse(body)
-    expect(result[0]).toBe(url2)
-    expect(result[1]).toBe(url1)
-    expect(result.length).toBe(2)
-    done()
-  })
-})
+    const result: any[] = JSON.parse(body);
+    expect(result[0]).toBe(url2);
+    expect(result[1]).toBe(url1);
+    expect(result.length).toBe(2);
+    done();
+  });
+});
 
 // SET & RETRIEVE
 
-/*
-it('wait for a while', (done) => {
-  setTimeout(()=>{
-    node1.logState()
-    node2.logState()
-    node3.logState()
-    done()
-  }, 500)
-})
+it("wait for a while", (done) => {
+  setTimeout(() => {
+    node1.logState();
+    node2.logState();
+    node3.logState();
+    done();
+  }, 500);
+});
 
-it('send setData to node 1', (done) => {
+it("send setData to node 1", (done) => {
   httpRequest(`${url1}/set?key=foo&value=bar`, (error, response, body) => {
-    console.log(body)
-    let result: boolean = JSON.parse(body)
-    expect(result).toBeTruthy()
-    done()
-  })
-})
+    const result: boolean = JSON.parse(body);
+    expect(result).toBeTruthy();
+    done();
+  });
+});
 
-it('wait for a while', (done) => {
-  setTimeout(()=>{
-    node1.logState()
-    node2.logState()
-    node3.logState()
-    done()
-  }, 500)
-})
+it("wait for a while", (done) => {
+  setTimeout(() => {
+    node1.logState();
+    node2.logState();
+    node3.logState();
+    done();
+  }, 500);
+});
 
-it('retrieve data from node2', (done) => {
+it("retrieve data from node2", (done) => {
   httpRequest(`${url2}/get?key=foo`, (error, response, body) => {
-    let result: boolean = JSON.parse(body)
-    expect(result['foo']).toBe('bar')
-    done()
-  })
-})
+    const result: any = JSON.parse(body);
+    expect(result.foo).toBe("bar");
+    done();
+  });
+});
 
-it('retrieve data from node3', (done) => {
+it("retrieve data from node3", (done) => {
   httpRequest(`${url3}/get?key=foo`, (error, response, body) => {
-    console.log(body)
-    let result: boolean = JSON.parse(body)
-    expect(result['foo']).toBe('bar')
-    done()
-  })
-})
-*/
+    const result: any = JSON.parse(body);
+    expect(result.foo).toBe("bar");
+    done();
+  });
+});
 
 // CLOSE ALL NODES
 
-it('close node1', (done) => {
+it("close node1", (done) => {
   server1.close(() => {
-    expect(server1.listening).toBeFalsy()
-    done()
-  })
-})
+    expect(server1.listening).toBeFalsy();
+    done();
+  });
+});
 
-it('close node2', (done) => {
+it("close node2", (done) => {
   server2.close(() => {
-    expect(server2.listening).toBeFalsy()
-    done()
-  })
-})
+    expect(server2.listening).toBeFalsy();
+    done();
+  });
+});
 
-it('close node3', (done) => {
+it("close node3", (done) => {
   server3.close(() => {
-    expect(server3.listening).toBeFalsy()
-    done()
-  })
-})
+    expect(server3.listening).toBeFalsy();
+    done();
+  });
+});

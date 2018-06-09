@@ -4,7 +4,19 @@
   "description": "Raft consensus algorithm for kalimat.ai",
   "main": "index.js",
   "scripts": {
-    "test": "tsc && jest"
+    "lint": "tslint -c tslint.json 'src/**/*.{ts,tsx}'",
+    "pretest": "npm run lint && tsc",
+    "test": "jest"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "transform": {
+      "\\.(ts|tsx)$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    }
   },
   "author": "goFrendi",
   "license": "ISC",
@@ -17,6 +29,7 @@
   },
   "devDependencies": {
     "@types/jest": "^23.0.0",
-    "jest": "^23.1.0"
+    "jest": "^23.1.0",
+    "ts-jest": "^22.4.6"
   }
 }

@@ -7,10 +7,10 @@ function runApp(config) {
     raftNode.run();
 }
 if (require.main === module) {
-    let args = process.argv.slice(2);
-    let port = args[0] ? parseInt(args[0]) : 3000;
-    let heartBeatTimeOut = args[1] ? parseInt(args[1]) : 100;
-    let electionTimeOut = args[2] ? parseInt(args[2]) : Math.round(Math.random() * 150) + 150;
-    let url = args[2] ? args[2] : 'http://localhost';
+    const args = process.argv.slice(2);
+    const port = args[0] ? parseInt(args[0], 10) : 3000;
+    const heartBeatTimeOut = args[1] ? parseInt(args[1], 10) : 100;
+    const electionTimeOut = args[2] ? parseInt(args[2], 10) : Math.round(Math.random() * 150) + 150;
+    const url = args[2] ? args[2] : "http://localhost";
     runApp({ port, heartBeatTimeOut, electionTimeOut, url });
 }

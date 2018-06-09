@@ -1,7 +1,7 @@
 /// <reference types="node" />
-import IChange from '../interfaces/IChange';
-import express = require('express');
-import http = require('http');
+import express = require("express");
+import http = require("http");
+import IChange from "../interfaces/IChange";
 export default class RaftNode {
     port: number;
     heartBeatTimeOut: number;
@@ -14,8 +14,8 @@ export default class RaftNode {
     data: {
         [key: string]: string;
     };
-    changes: Array<IChange>;
-    fellows: Array<string>;
+    changes: IChange[];
+    fellows: string[];
     vote: string;
     constructor(port?: number, heartBeatTimeOut?: number, electionTimeOut?: number, url?: string);
     stringify(data: any, pretty?: boolean): string;
