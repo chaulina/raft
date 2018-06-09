@@ -1,6 +1,6 @@
 
 > kalimat.ai@1.0.0 pretest /home/gofrendi/Projects/kalimat.ai
-> npm run lint && tsc
+> npm run lint && tsc --sourcemap
 
 
 > kalimat.ai@1.0.0 lint /home/gofrendi/Projects/kalimat.ai
@@ -10,102 +10,149 @@
 > kalimat.ai@1.0.0 test /home/gofrendi/Projects/kalimat.ai
 > jest
 
-  console.log dist/classes/RaftNode.js:282
-    Initiating RaftNode at http://localhost:3010
+PASS src/classes/RaftNode.test.ts
+  ● Console
 
-  console.log dist/classes/RaftNode.js:282
-    Initiating RaftNode at http://localhost:3011
-
-  console.log dist/classes/RaftNode.js:282
-    Initiating RaftNode at http://localhost:3012
-
-  console.log dist/classes/RaftNode.js:182
-    { changes: [],
-      currentLeader: 'http://localhost:3011',
-      currentUrl: 'http://localhost:3010',
-      data: {},
-      fellows: [ 'http://localhost:3011', 'http://localhost:3012' ],
-      state: 'Follower',
-      term: 2,
-      vote: 'http://localhost:3011' }
-
-  console.log dist/classes/RaftNode.js:182
-    { changes: [],
-      currentLeader: 'http://localhost:3011',
-      currentUrl: 'http://localhost:3011',
-      data: {},
-      fellows: [ 'http://localhost:3010', 'http://localhost:3012' ],
-      state: 'Leader',
-      term: 2,
-      vote: 'http://localhost:3011' }
-
-  console.log dist/classes/RaftNode.js:182
-    { changes: [],
-      currentLeader: 'http://localhost:3011',
-      currentUrl: 'http://localhost:3012',
-      data: {},
-      fellows: [ 'http://localhost:3011', 'http://localhost:3010' ],
-      state: 'Follower',
-      term: 2,
-      vote: 'http://localhost:3011' }
+    console.log src/classes/RaftNode.ts:297
+      Initiating RaftNode at http://localhost:3010
+    console.log src/classes/RaftNode.ts:297
+      Initiating RaftNode at http://localhost:3011
+    console.log src/classes/RaftNode.ts:297
+      Initiating RaftNode at http://localhost:3012
+    console.log src/classes/RaftNode.ts:189
+      { changes: [],
+        currentLeader: 'http://localhost:3011',
+        currentUrl: 'http://localhost:3010',
+        data: {},
+        fellows: [ 'http://localhost:3011', 'http://localhost:3012' ],
+        state: 'Follower',
+        term: 2,
+        vote: 'http://localhost:3011' }
+    console.log src/classes/RaftNode.ts:189
+      { changes: [],
+        currentLeader: 'http://localhost:3011',
+        currentUrl: 'http://localhost:3011',
+        data: {},
+        fellows: [ 'http://localhost:3010', 'http://localhost:3012' ],
+        state: 'Leader',
+        term: 2,
+        vote: 'http://localhost:3011' }
+    console.log src/classes/RaftNode.ts:189
+      { changes: [],
+        currentLeader: 'http://localhost:3011',
+        currentUrl: 'http://localhost:3012',
+        data: {},
+        fellows: [ 'http://localhost:3011', 'http://localhost:3010' ],
+        state: 'Follower',
+        term: 2,
+        vote: 'http://localhost:3011' }
+    console.log src/classes/RaftNode.ts:189
+      { changes: 
+         [ { key: 'foo', value: 'bar', state: 1 },
+           { key: 'spam', value: 'egg', state: 1 } ],
+        currentLeader: 'http://localhost:3011',
+        currentUrl: 'http://localhost:3010',
+        data: { foo: 'bar', spam: 'egg' },
+        fellows: [ 'http://localhost:3011', 'http://localhost:3012' ],
+        state: 'Follower',
+        term: 2,
+        vote: 'http://localhost:3011' }
+    console.log src/classes/RaftNode.ts:189
+      { changes: 
+         [ { key: 'foo', value: 'bar', state: 1 },
+           { key: 'spam', value: 'egg', state: 1 } ],
+        currentLeader: 'http://localhost:3011',
+        currentUrl: 'http://localhost:3011',
+        data: { foo: 'bar', spam: 'egg' },
+        fellows: [ 'http://localhost:3010', 'http://localhost:3012' ],
+        state: 'Leader',
+        term: 2,
+        vote: 'http://localhost:3011' }
+    console.log src/classes/RaftNode.ts:189
+      { changes: 
+         [ { key: 'foo', value: 'bar', state: 1 },
+           { key: 'spam', value: 'egg', state: 1 } ],
+        currentLeader: 'http://localhost:3011',
+        currentUrl: 'http://localhost:3012',
+        data: { foo: 'bar', spam: 'egg' },
+        fellows: [ 'http://localhost:3011', 'http://localhost:3010' ],
+        state: 'Follower',
+        term: 2,
+        vote: 'http://localhost:3011' }
 
 PASS dist/classes/RaftNode.test.js
-  ✓ run node1 (32ms)
-  ✓ run node2 (1ms)
-  ✓ run node3 (1ms)
-  ✓ add node2 to node1 (38ms)
-  ✓ re-add node2 to node1 (4ms)
-  ✓ add node3 to node1 (3ms)
-  ✓ confirm that node1 has two fellows (3ms)
-  ✓ add node1 to node2 (7ms)
-  ✓ add node3 to node2 (3ms)
-  ✓ add node1 to node3 (2ms)
-  ✓ add node2 to node3 (2ms)
-  ✓ remove node1 from node3 (2ms)
-  ✓ confirm that node3 has only node2 as fellow (2ms)
-  ✓ re-add node1 to node3 (2ms)
-  ✓ confirm that node3 has two fellows (3ms)
-  ✓ wait for a while (503ms)
-  ✓ send setData to node 1 (6ms)
-  ✓ wait for a while (505ms)
-  ✓ retrieve data from node2 (22ms)
-  ✓ retrieve data from node3 (5ms)
-  ✓ close node1 (2ms)
-  ✓ close node2
-  ✓ close node3 (1ms)
+  ● Console
 
-Test Suites: 1 passed, 1 total
-Tests:       23 passed, 23 total
+    console.log dist/classes/RaftNode.js:282
+      Initiating RaftNode at http://localhost:3010
+    console.log dist/classes/RaftNode.js:282
+      Initiating RaftNode at http://localhost:3011
+    console.log dist/classes/RaftNode.js:282
+      Initiating RaftNode at http://localhost:3012
+    console.log dist/classes/RaftNode.js:182
+      { changes: [],
+        currentLeader: 'http://localhost:3011',
+        currentUrl: 'http://localhost:3010',
+        data: {},
+        fellows: [ 'http://localhost:3011', 'http://localhost:3012' ],
+        state: 'Follower',
+        term: 1,
+        vote: 'http://localhost:3011' }
+    console.log dist/classes/RaftNode.js:182
+      { changes: [],
+        currentLeader: 'http://localhost:3011',
+        currentUrl: 'http://localhost:3011',
+        data: {},
+        fellows: [ 'http://localhost:3010', 'http://localhost:3012' ],
+        state: 'Leader',
+        term: 1,
+        vote: 'http://localhost:3011' }
+    console.log dist/classes/RaftNode.js:182
+      { changes: [],
+        currentLeader: 'http://localhost:3011',
+        currentUrl: 'http://localhost:3012',
+        data: {},
+        fellows: [ 'http://localhost:3011', 'http://localhost:3010' ],
+        state: 'Follower',
+        term: 1,
+        vote: 'http://localhost:3011' }
+    console.log dist/classes/RaftNode.js:182
+      { changes: 
+         [ { key: 'foo', value: 'bar', state: 1 },
+           { key: 'spam', value: 'egg', state: 1 } ],
+        currentLeader: 'http://localhost:3011',
+        currentUrl: 'http://localhost:3010',
+        data: { foo: 'bar', spam: 'egg' },
+        fellows: [ 'http://localhost:3011', 'http://localhost:3012' ],
+        state: 'Follower',
+        term: 1,
+        vote: 'http://localhost:3011' }
+    console.log dist/classes/RaftNode.js:182
+      { changes: 
+         [ { key: 'foo', value: 'bar', state: 1 },
+           { key: 'spam', value: 'egg', state: 1 } ],
+        currentLeader: 'http://localhost:3011',
+        currentUrl: 'http://localhost:3011',
+        data: { foo: 'bar', spam: 'egg' },
+        fellows: [ 'http://localhost:3010', 'http://localhost:3012' ],
+        state: 'Leader',
+        term: 1,
+        vote: 'http://localhost:3011' }
+    console.log dist/classes/RaftNode.js:182
+      { changes: 
+         [ { key: 'foo', value: 'bar', state: 1 },
+           { key: 'spam', value: 'egg', state: 1 } ],
+        currentLeader: 'http://localhost:3011',
+        currentUrl: 'http://localhost:3012',
+        data: { foo: 'bar', spam: 'egg' },
+        fellows: [ 'http://localhost:3011', 'http://localhost:3010' ],
+        state: 'Follower',
+        term: 1,
+        vote: 'http://localhost:3011' }
+
+
+Test Suites: 2 passed, 2 total
+Tests:       56 passed, 56 total
 Snapshots:   0 total
-Time:        7.873s
+Time:        4.246s
 Ran all test suites.
-  console.log dist/classes/RaftNode.js:182
-    { changes: [ { key: 'foo', value: 'bar', state: 1 } ],
-      currentLeader: 'http://localhost:3011',
-      currentUrl: 'http://localhost:3010',
-      data: { foo: 'bar' },
-      fellows: [ 'http://localhost:3011', 'http://localhost:3012' ],
-      state: 'Follower',
-      term: 2,
-      vote: 'http://localhost:3011' }
-
-  console.log dist/classes/RaftNode.js:182
-    { changes: [ { key: 'foo', value: 'bar', state: 1 } ],
-      currentLeader: 'http://localhost:3011',
-      currentUrl: 'http://localhost:3011',
-      data: { foo: 'bar' },
-      fellows: [ 'http://localhost:3010', 'http://localhost:3012' ],
-      state: 'Leader',
-      term: 2,
-      vote: 'http://localhost:3011' }
-
-  console.log dist/classes/RaftNode.js:182
-    { changes: [ { key: 'foo', value: 'bar', state: 1 } ],
-      currentLeader: 'http://localhost:3011',
-      currentUrl: 'http://localhost:3012',
-      data: { foo: 'bar' },
-      fellows: [ 'http://localhost:3011', 'http://localhost:3010' ],
-      state: 'Follower',
-      term: 2,
-      vote: 'http://localhost:3011' }
-

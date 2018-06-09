@@ -5,18 +5,22 @@
   "main": "index.js",
   "scripts": {
     "lint": "tslint -c tslint.json 'src/**/*.{ts,tsx}'",
-    "pretest": "npm run lint && tsc",
+    "pretest": "npm run lint && tsc --sourcemap",
     "test": "jest"
   },
   "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
     "moduleFileExtensions": [
       "ts",
       "tsx",
-      "js"
-    ],
-    "transform": {
-      "\\.(ts|tsx)$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
-    }
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
   },
   "author": "goFrendi",
   "license": "ISC",

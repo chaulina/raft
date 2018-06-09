@@ -14,3 +14,4 @@ if (require.main === module) {
     const url = args[2] ? args[2] : "http://localhost";
     runApp({ port, heartBeatTimeOut, electionTimeOut, url });
 }
+//# sourceMappingURL=index.js.map

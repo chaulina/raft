@@ -162,8 +162,16 @@ it("wait for a while", (done) => {
   }, 500);
 });
 
-it("send setData to node 1", (done) => {
+it("send setData foo = bar to node 1", (done) => {
   httpRequest(`${url1}/set?key=foo&value=bar`, (error, response, body) => {
+    const result: boolean = JSON.parse(body);
+    expect(result).toBeTruthy();
+    done();
+  });
+});
+
+it("send setData spam = egg to node 2", (done) => {
+  httpRequest(`${url2}/set?key=spam&value=egg`, (error, response, body) => {
     const result: boolean = JSON.parse(body);
     expect(result).toBeTruthy();
     done();
@@ -179,7 +187,15 @@ it("wait for a while", (done) => {
   }, 500);
 });
 
-it("retrieve data from node2", (done) => {
+it("retrieve data foo from node1", (done) => {
+  httpRequest(`${url1}/get?key=foo`, (error, response, body) => {
+    const result: any = JSON.parse(body);
+    expect(result.foo).toBe("bar");
+    done();
+  });
+});
+
+it("retrieve data foo from node2", (done) => {
   httpRequest(`${url2}/get?key=foo`, (error, response, body) => {
     const result: any = JSON.parse(body);
     expect(result.foo).toBe("bar");
@@ -187,10 +203,34 @@ it("retrieve data from node2", (done) => {
   });
 });
 
-it("retrieve data from node3", (done) => {
+it("retrieve data foo from node3", (done) => {
   httpRequest(`${url3}/get?key=foo`, (error, response, body) => {
     const result: any = JSON.parse(body);
     expect(result.foo).toBe("bar");
+    done();
+  });
+});
+
+it("retrieve data spam from node1", (done) => {
+  httpRequest(`${url1}/get?key=spam`, (error, response, body) => {
+    const result: any = JSON.parse(body);
+    expect(result.spam).toBe("egg");
+    done();
+  });
+});
+
+it("retrieve data spam from node2", (done) => {
+  httpRequest(`${url2}/get?key=spam`, (error, response, body) => {
+    const result: any = JSON.parse(body);
+    expect(result.spam).toBe("egg");
+    done();
+  });
+});
+
+it("retrieve data spam from node3", (done) => {
+  httpRequest(`${url3}/get?key=spam`, (error, response, body) => {
+    const result: any = JSON.parse(body);
+    expect(result.spam).toBe("egg");
     done();
   });
 });
