@@ -295,7 +295,9 @@ export default class RaftNode {
     this.registerControllers(app);
     const server: http.Server = app.listen(this.port, () => {
       console.log(`Initiating RaftNode at ${this.currentUrl}`);
-      callback();
+      if (typeof callback === "function") {
+        callback();
+      }
       setTimeout(() => {
         this.loop();
       }, this.heartBeatTimeOut);

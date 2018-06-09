@@ -8,10 +8,9 @@ function runApp(config) {
 }
 if (require.main === module) {
     const args = process.argv.slice(2);
-    const port = args[0] ? parseInt(args[0], 10) : 3000;
+    const port = args[0] ? parseInt(args[0], 10) : parseInt(process.env.PORT, 10) || 3000;
     const heartBeatTimeOut = args[1] ? parseInt(args[1], 10) : 100;
     const electionTimeOut = args[2] ? parseInt(args[2], 10) : Math.round(Math.random() * 150) + 150;
     const url = args[2] ? args[2] : "http://localhost";
     runApp({ port, heartBeatTimeOut, electionTimeOut, url });
 }
-//# sourceMappingURL=index.js.map

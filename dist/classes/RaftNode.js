@@ -280,7 +280,9 @@ class RaftNode {
         this.registerControllers(app);
         const server = app.listen(this.port, () => {
             console.log(`Initiating RaftNode at ${this.currentUrl}`);
-            callback();
+            if (typeof callback === "function") {
+                callback();
+            }
             setTimeout(() => {
                 this.loop();
             }, this.heartBeatTimeOut);
@@ -319,4 +321,3 @@ class RaftNode {
     }
 }
 exports.default = RaftNode;
-//# sourceMappingURL=RaftNode.js.map
