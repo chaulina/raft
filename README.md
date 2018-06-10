@@ -38,7 +38,7 @@ To start the server, you can execute `node dist/index.js <port> <heartBeatTimeOu
 This is how to run a node at port 3010:
 
 ```bash
-node dist/index.js 3010 50 150 "http://localhost"
+node dist/index.js 3010 50 150 "http://localhost:3010"
 ```
 
 The node can also be started programmatically. For example, the my unit-test (`src/classes/RaftNode.test.ts`), I do this:
@@ -374,8 +374,55 @@ Time:        4.246s
 Ran all test suites.
 ```
 
+# Deployment
+
+I deploy the solution by using `heroku` platform. The nodes are exposed as `kalimat-1.herokuapp.com`, `kalimat-2.herokuapp.com`, and `kalimat-3.herokuapp.com`.
+
+In order to make this single git repository deployable to those 3 nodes, I add `Profile` and modify `.git/config`.
+
+The content of `Procfile` is as follow:
+
+```
+web: node dist/index.js $PORT 50 150 $HEROKU_APP_NAME.herokuapp.com kalimat1.herokuapp.com kalimat2.herokuapp.com kalimat3.herokuapp.com
+```
+
+while the content of `.git/config` is as presented below:
+
+```
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+[remote "origin"]
+	url = git@github.com:goFrendiAsgard/raft.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "master"]
+	remote = origin
+	merge = refs/heads/master
+[remote "kalimat1"]
+	url = https://git.heroku.com/kalimat-1.git
+	fetch = +refs/heads/*:refs/remotes/heroku/*
+[remote "kalimat2"]
+	url = https://git.heroku.com/kalimat-2.git
+	fetch = +refs/heads/*:refs/remotes/heroku/*
+[remote "kalimat3"]
+	url = https://git.heroku.com/kalimat-3.git
+	fetch = +refs/heads/*:refs/remotes/heroku/*
+```
+
+Aside from modifying the files, I also has to enable labs feature using this command
+
+```bash
+heroku labs:enable runtime-dyno-metadata -a kalimat-1
+heroku labs:enable runtime-dyno-metadata -a kalimat-2
+heroku labs:enable runtime-dyno-metadata -a kalimat-3
+```
+
 # Conclusion
 
 This is my first experience doing a project with `typescript` and `jest`. I like how things work so far.
 
 I believe that my code is not so idiomatic. I put everything in `RaftNode` class, and I'm not sure I will be able to easily fix things one month from now.
+
+However, things are working as expected.
