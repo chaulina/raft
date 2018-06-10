@@ -259,4 +259,3 @@ it("close node3", (done) => {
         done();
     });
 });
-//# sourceMappingURL=RaftNode.test.js.map

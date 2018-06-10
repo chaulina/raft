@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const RaftNode_1 = require("./classes/RaftNode");
 function runApp(config) {
     const { port, heartBeatTimeOut, electionTimeOut, url, fellows } = config;
-    const raftNode = new RaftNode_1.default(port, electionTimeOut, heartBeatTimeOut, url, fellows);
+    const raftNode = new RaftNode_1.default(port, heartBeatTimeOut, electionTimeOut, url, fellows);
     raftNode.run();
 }
 if (require.main === module) {
@@ -16,4 +16,3 @@ if (require.main === module) {
     const fellows = args.slice(4);
     runApp({ port, heartBeatTimeOut, electionTimeOut, url, fellows });
 }
-//# sourceMappingURL=index.js.map
