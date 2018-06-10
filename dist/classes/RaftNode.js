@@ -171,7 +171,7 @@ class RaftNode {
     isShouldBeCandidate() {
         return this.currentState === 0 && this.isNotAcceptHeartBeat();
     }
-    logState() {
+    getState() {
         let stateString;
         switch (this.currentState) {
             case 0:
@@ -184,7 +184,7 @@ class RaftNode {
                 stateString = "Leader";
                 break;
         }
-        console.log({
+        return {
             changes: this.changes,
             currentLeader: this.currentLeader,
             currentUrl: this.currentUrl,
@@ -193,7 +193,10 @@ class RaftNode {
             state: stateString,
             term: this.term,
             vote: this.vote,
-        });
+        };
+    }
+    logState() {
+        console.log(this.getState());
     }
     registerGetDataController(app) {
         app.use("/get", (request, response) => {
@@ -271,6 +274,11 @@ class RaftNode {
             response.send(this.stringify(true));
         });
     }
+    registerLogStateController(app) {
+        app.use("/state", (request, response) => {
+            response.send(this.stringify(this.getState()));
+        });
+    }
     registerControllers(app) {
         this.registerGetDataController(app);
         this.registerSetDataController(app);
@@ -279,6 +287,7 @@ class RaftNode {
         this.registerShowFellowController(app);
         this.registerElectRequestController(app);
         this.registerHeartBeatController(app);
+        this.registerLogStateController(app);
     }
     run(callback) {
         const app = express();
@@ -326,3 +335,4 @@ class RaftNode {
     }
 }
 exports.default = RaftNode;
+//# sourceMappingURL=RaftNode.js.map

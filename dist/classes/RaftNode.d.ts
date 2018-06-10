@@ -1,4 +1,3 @@
-/// <reference types="express" />
 /// <reference types="node" />
 import express = require("express");
 import http = require("http");
@@ -37,6 +36,9 @@ export default class RaftNode {
     };
     isNotAcceptHeartBeat(): boolean;
     isShouldBeCandidate(): boolean;
+    getState(): {
+        [key: string]: any;
+    };
     logState(): void;
     registerGetDataController(app: express.Application): void;
     registerSetDataController(app: express.Application): void;
@@ -45,6 +47,7 @@ export default class RaftNode {
     registerShowFellowController(app: express.Application): void;
     registerElectRequestController(app: express.Application): void;
     registerHeartBeatController(app: express.Application): void;
+    registerLogStateController(app: express.Application): void;
     registerControllers(app: express.Application): void;
     run(callback?: () => any): http.Server;
     loop(): void;

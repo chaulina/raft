@@ -16,3 +16,4 @@ if (require.main === module) {
     const fellows = args.slice(4);
     runApp({ port, heartBeatTimeOut, electionTimeOut, url, fellows });
 }
+//# sourceMappingURL=index.js.map
