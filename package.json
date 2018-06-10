@@ -10,16 +10,13 @@
   },
   "jest": {
     "transform": {
-      "^.+\\.tsx?$": "ts-jest"
+      "\\.(ts|tsx)$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },
-    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "testRegex": "/.*\\.test\\.(ts|tsx)$",
     "moduleFileExtensions": [
       "ts",
       "tsx",
-      "js",
-      "jsx",
-      "json",
-      "node"
+      "js"
     ]
   },
   "author": "goFrendi",

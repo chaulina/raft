@@ -135,9 +135,6 @@ it("confirm that node3 has two fellows", (done) => {
 // SET & RETRIEVE
 it("wait for a while", (done) => {
     setTimeout(() => {
-        node1.logState();
-        node2.logState();
-        node3.logState();
         done();
     }, 500);
 });
@@ -157,9 +154,6 @@ it("send setData spam = egg to node 2", (done) => {
 });
 it("wait for a while", (done) => {
     setTimeout(() => {
-        node1.logState();
-        node2.logState();
-        node3.logState();
         done();
     }, 500);
 });
@@ -184,6 +178,39 @@ it("retrieve data foo from node3", (done) => {
         done();
     });
 });
+it("send setData foo = wa to node 3", (done) => {
+    httpRequest(`${url3}/set?key=foo&value=wa`, (error, response, body) => {
+        const result = JSON.parse(body);
+        expect(result).toBeTruthy();
+        done();
+    });
+});
+it("wait for a while", (done) => {
+    setTimeout(() => {
+        done();
+    }, 500);
+});
+it("retrieve data foo from node1", (done) => {
+    httpRequest(`${url1}/get?key=foo`, (error, response, body) => {
+        const result = JSON.parse(body);
+        expect(result.foo).toBe("wa");
+        done();
+    });
+});
+it("retrieve data foo from node2", (done) => {
+    httpRequest(`${url2}/get?key=foo`, (error, response, body) => {
+        const result = JSON.parse(body);
+        expect(result.foo).toBe("wa");
+        done();
+    });
+});
+it("retrieve data foo from node3", (done) => {
+    httpRequest(`${url3}/get?key=foo`, (error, response, body) => {
+        const result = JSON.parse(body);
+        expect(result.foo).toBe("wa");
+        done();
+    });
+});
 it("retrieve data spam from node1", (done) => {
     httpRequest(`${url1}/get?key=spam`, (error, response, body) => {
         const result = JSON.parse(body);
@@ -204,6 +231,14 @@ it("retrieve data spam from node3", (done) => {
         expect(result.spam).toBe("egg");
         done();
     });
+});
+it("wait for a while", (done) => {
+    setTimeout(() => {
+        node1.logState();
+        node2.logState();
+        node3.logState();
+        done();
+    }, 500);
 });
 // CLOSE ALL NODES
 it("close node1", (done) => {
