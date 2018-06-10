@@ -183,14 +183,14 @@ export default class RaftNode {
     return this.currentState === 0 && this.isNotAcceptHeartBeat();
   }
 
-  public logState(): void {
+  public getState(): {[key: string]: any} {
     let stateString: string;
     switch (this.currentState) {
       case 0: stateString = "Follower"; break;
       case 1: stateString = "Candidate"; break;
       case 2: stateString = "Leader"; break;
     }
-    console.log({
+    return {
       changes: this.changes,
       currentLeader: this.currentLeader,
       currentUrl: this.currentUrl,
@@ -199,7 +199,11 @@ export default class RaftNode {
       state: stateString,
       term: this.term,
       vote: this.vote,
-    });
+    };
+  }
+
+  public logState(): void {
+    console.log(this.getState());
   }
 
   public registerGetDataController(app: express.Application): void {
@@ -284,6 +288,12 @@ export default class RaftNode {
     });
   }
 
+  public registerLogStateController(app: express.Application): void {
+    app.use("/state", (request: express.Request, response: express.Response) => {
+      response.send(this.stringify(this.getState()));
+    });
+  }
+
   public registerControllers(app: express.Application): void {
     this.registerGetDataController(app);
     this.registerSetDataController(app);
@@ -292,6 +302,7 @@ export default class RaftNode {
     this.registerShowFellowController(app);
     this.registerElectRequestController(app);
     this.registerHeartBeatController(app);
+    this.registerLogStateController(app);
   }
 
   public run(callback?: () => any): http.Server {
