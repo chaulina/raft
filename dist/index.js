@@ -12,8 +12,7 @@ if (require.main === module) {
     const heartBeatTimeOut = args[1] ? parseInt(args[1], 10) : 100;
     const electionTimeOut = args[2] && args[2] !== "random" ?
         parseInt(args[2], 10) : Math.round(Math.random() * 150) + 150;
-    const url = args[2] ? args[2] : `http://localhost:{$port}`;
-    const fellows = args.slice(3);
+    const url = args[3] ? args[3] : `http://localhost:{$port}`;
+    const fellows = args.slice(4);
     runApp({ port, heartBeatTimeOut, electionTimeOut, url, fellows });
 }
-//# sourceMappingURL=index.js.map
