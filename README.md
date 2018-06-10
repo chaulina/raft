@@ -383,7 +383,7 @@ In order to make this single git repository deployable to those 3 nodes, I add `
 The content of `Procfile` is as follow:
 
 ```
-web: node dist/index.js $PORT 50 150 $HEROKU_APP_NAME.herokuapp.com kalimat1.herokuapp.com kalimat2.herokuapp.com kalimat3.herokuapp.com
+web: node dist/index.js $PORT 50 random $HEROKU_APP_NAME.herokuapp.com http://kalimat-1.herokuapp.com http://kalimat-2.herokuapp.com http://kalimat-3.herokuapp.com
 ```
 
 while the content of `.git/config` is as presented below:
@@ -418,6 +418,12 @@ heroku labs:enable runtime-dyno-metadata -a kalimat-1
 heroku labs:enable runtime-dyno-metadata -a kalimat-2
 heroku labs:enable runtime-dyno-metadata -a kalimat-3
 ```
+
+## Testing The Deployed Solution
+
+* Send `HTTP GET` request to `http://kalimat-1.herokuapp.com/set?key=kota&value=malang`. The response will be `true`.
+* Send `HTTP GET` request to `http://kalimat-2.herokuapp.com/set?key=provinsi&value=jatim`. The response will be `true`
+* Send `HTTP GET` request to `http://kalimat-3.herokuapp.com/get`. The response will be `[{"kota": "malang"}, {"provinsi": "jatim"}]`
 
 # Conclusion
 
