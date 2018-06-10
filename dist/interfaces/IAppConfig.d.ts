@@ -3,4 +3,5 @@ export default interface IAppConfig {
     heartBeatTimeOut: number;
     electionTimeOut: number;
     url: string;
+    fellows: string[];
 }

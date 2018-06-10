@@ -1,4 +1,3 @@
-/// <reference types="express" />
 /// <reference types="node" />
 import express = require("express");
 import http = require("http");
@@ -7,8 +6,9 @@ export default class RaftNode {
     port: number;
     heartBeatTimeOut: number;
     electionTimeOut: number;
-    currentState: number;
     currentUrl: string;
+    fellows: string[];
+    currentState: number;
     currentLeader: string;
     term: number;
     lastHeartBeat: number;
@@ -16,9 +16,8 @@ export default class RaftNode {
         [key: string]: string;
     };
     changes: IChange[];
-    fellows: string[];
     vote: string;
-    constructor(port?: number, heartBeatTimeOut?: number, electionTimeOut?: number, url?: string);
+    constructor(port?: number, heartBeatTimeOut?: number, electionTimeOut?: number, currentUrl?: string, fellows?: string[]);
     stringify(data: any, pretty?: boolean): string;
     applyChanges(key: any, value: any): void;
     rollbackChanges(): void;

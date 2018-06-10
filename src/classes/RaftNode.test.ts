@@ -18,9 +18,9 @@ const url2 = baseUrl + ":" + port2;
 const url3 = baseUrl + ":" + port3;
 
 // create nodes
-const node1 = new RaftNode(port1, heartBeatTimeOut1, electionTimeOut1, baseUrl);
-const node2 = new RaftNode(port2, heartBeatTimeOut2, electionTimeOut2, baseUrl);
-const node3 = new RaftNode(port3, heartBeatTimeOut3, electionTimeOut3, baseUrl);
+const node1 = new RaftNode(port1, heartBeatTimeOut1, electionTimeOut1, url1);
+const node2 = new RaftNode(port2, heartBeatTimeOut2, electionTimeOut2, url2);
+const node3 = new RaftNode(port3, heartBeatTimeOut3, electionTimeOut3, url3);
 let server1: http.Server;
 let server2: http.Server;
 let server3: http.Server;

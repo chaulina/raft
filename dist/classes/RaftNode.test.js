@@ -17,9 +17,9 @@ const url1 = baseUrl + ":" + port1;
 const url2 = baseUrl + ":" + port2;
 const url3 = baseUrl + ":" + port3;
 // create nodes
-const node1 = new RaftNode_1.default(port1, heartBeatTimeOut1, electionTimeOut1, baseUrl);
-const node2 = new RaftNode_1.default(port2, heartBeatTimeOut2, electionTimeOut2, baseUrl);
-const node3 = new RaftNode_1.default(port3, heartBeatTimeOut3, electionTimeOut3, baseUrl);
+const node1 = new RaftNode_1.default(port1, heartBeatTimeOut1, electionTimeOut1, url1);
+const node2 = new RaftNode_1.default(port2, heartBeatTimeOut2, electionTimeOut2, url2);
+const node3 = new RaftNode_1.default(port3, heartBeatTimeOut3, electionTimeOut3, url3);
 let server1;
 let server2;
 let server3;
@@ -224,3 +224,4 @@ it("close node3", (done) => {
         done();
     });
 });
+//# sourceMappingURL=RaftNode.test.js.map

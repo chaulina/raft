@@ -5,7 +5,6 @@ import IChange from "../interfaces/IChange";
 
 export default class RaftNode {
   public currentState: number = 0; // 0: follower, 1: candidate, 2: leader
-  public currentUrl: string;
   public currentLeader: string = "";
   public term: number = 0;
   public lastHeartBeat: number = 0;
@@ -13,10 +12,15 @@ export default class RaftNode {
   public changes: IChange[] = [];
   public vote: string = "";
 
-  constructor(public port: number = 80, public heartBeatTimeOut: number = 100,
-              public electionTimeOut: number = 150, url: string = "http://localhost",
+  constructor(public port: number = 3000, public heartBeatTimeOut: number = 100,
+              public electionTimeOut: number = 150,
+              public currentUrl: string = "http://localhost:3000",
               public fellows: string[] = []) {
-    this.currentUrl = `${url}:${port}`;
+    // remove currentUrl from fellows
+    const currentUrlIndex: number = this.fellows.indexOf(this.currentUrl);
+    if (currentUrlIndex > -1) {
+      this.fellows.splice(currentUrlIndex, 1);
+    }
   }
 
   public stringify(data: any, pretty: boolean = true): string {

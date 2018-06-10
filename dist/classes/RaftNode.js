@@ -3,19 +3,24 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const httpRequest = require("request");
 class RaftNode {
-    constructor(port = 80, heartBeatTimeOut = 100, electionTimeOut = 150, url = "http://localhost") {
+    constructor(port = 3000, heartBeatTimeOut = 100, electionTimeOut = 150, currentUrl = "http://localhost:3000", fellows = []) {
         this.port = port;
         this.heartBeatTimeOut = heartBeatTimeOut;
         this.electionTimeOut = electionTimeOut;
+        this.currentUrl = currentUrl;
+        this.fellows = fellows;
         this.currentState = 0; // 0: follower, 1: candidate, 2: leader
         this.currentLeader = "";
         this.term = 0;
         this.lastHeartBeat = 0;
         this.data = {};
         this.changes = [];
-        this.fellows = [];
         this.vote = "";
-        this.currentUrl = `${url}:${port}`;
+        // remove currentUrl from fellows
+        const currentUrlIndex = this.fellows.indexOf(this.currentUrl);
+        if (currentUrlIndex > -1) {
+            this.fellows.splice(currentUrlIndex, 1);
+        }
     }
     stringify(data, pretty = true) {
         if (pretty) {
@@ -321,3 +326,4 @@ class RaftNode {
     }
 }
 exports.default = RaftNode;
+//# sourceMappingURL=RaftNode.js.map
