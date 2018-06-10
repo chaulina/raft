@@ -3,7 +3,7 @@ import IAppConfig from "./interfaces/IAppConfig";
 
 function runApp(config: IAppConfig): void {
   const {port, heartBeatTimeOut, electionTimeOut, url, fellows} = config;
-  const raftNode: RaftNode = new RaftNode(port, electionTimeOut, heartBeatTimeOut, url, fellows);
+  const raftNode: RaftNode = new RaftNode(port, heartBeatTimeOut, electionTimeOut, url, fellows);
   raftNode.run();
 }
 
